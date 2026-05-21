@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ChatOllama.Api/ChatOllama.Api.csproj" />
+    <Project Path="src/ChatOllama.Shared/ChatOllama.Shared.csproj" />
+    <Project Path="src/ChatOllama.Web/ChatOllama.Web.csproj" />
+  </Folder>
+</Solution>

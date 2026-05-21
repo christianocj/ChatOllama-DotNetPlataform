@@ -1,0 +1,6 @@
+@ChatOllama.Api_HostAddress = http://localhost:5274
+
+GET {{ChatOllama.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
