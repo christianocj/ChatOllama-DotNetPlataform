@@ -1,5 +1,7 @@
-﻿using ChatOllama.Shared.Domain.Interfaces;
+﻿using ChatOllama.Shared.Domain.Enums;
+using ChatOllama.Shared.Domain.Interfaces;
 using ChatOllama.Shared.Domain.Models;
+using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
 using OllamaSharp;
 using System.Runtime.CompilerServices;
@@ -10,11 +12,13 @@ namespace ChatOllama.Api.Infrastructure.IA
     {
         private readonly IChatClient _chatClient;
         private readonly OllamaApiClient _ollamaClient;
-
-        public OllamaChatProvider(IChatClient chatClient, OllamaApiClient ollamaRawClient)
+        private readonly IMessageRepository _messages;
+        static readonly int idchat = 1;
+        public OllamaChatProvider(IChatClient chatClient, OllamaApiClient ollamaRawClient, IMessageRepository sessionRepository)
         {
             _chatClient = chatClient;
             _ollamaClient = ollamaRawClient;
+            _messages = sessionRepository;
         }
 
         public async Task<IEnumerable<string>> GetAvailableModelsAsync()
@@ -27,31 +31,64 @@ namespace ChatOllama.Api.Infrastructure.IA
             return models;
         }
 
-        public async Task<string> SendMessageAsync(ChatSession session, string prompt, string modelName,
+        public async Task<string> SendMessageAsync(Guid sessionPublicId, string prompt, string modelName,
             CancellationToken cancellationToken = default)
         {
-            var historicoDeMensagens = ConstruirHistorico(session, prompt);
+            var agent = _chatClient.AsAIAgent(
+                new ChatClientAgentOptions
+                {
+                    //ChatHistoryProvider = new OllamaChatHistoryProvider(),
+                    ChatOptions = new ChatOptions
+                    {
+                        ModelId = modelName,
+                        Instructions = ""
+                    }
+                });
 
-            var opcoes = new ChatOptions { ModelId = modelName };
+            var memory = await agent.CreateSessionAsync(cancellationToken);
+            memory.SetInMemoryChatHistory( await RecuperarHistorico(sessionPublicId));
 
-            var resposta = await _chatClient.GetResponseAsync(historicoDeMensagens, opcoes, cancellationToken);
+            var msg = new ChatMessage(ChatRole.User, prompt)
+            {
+                CreatedAt = DateTime.UtcNow,
+                MessageId = Guid.CreateVersion7().ToString()
+            };
+            await AtualizarHistorico(MessageRole.User, prompt, sessionPublicId, modelName);
 
+            var resposta = await agent.RunAsync(msg, memory, cancellationToken: cancellationToken);
+
+            await AtualizarHistorico(MessageRole.Assistant, resposta.Text, sessionPublicId, modelName);
+
+            memory.TryGetInMemoryChatHistory(out var list);
+            Console.WriteLine(list?.Count);
             return resposta.Text;
         }
 
-        public Task<string> SendMessageAsync(string prompt, string modelName, CancellationToken cancellationToken = default)
+        //Para conversas temporárias, não guardar no banco
+        public async Task<string> SendMessageAsync(string prompt, string modelName, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var agent = _chatClient.AsAIAgent(
+                new ChatClientAgentOptions
+                {
+                    ChatHistoryProvider = new OllamaChatHistoryProvider(),
+                    ChatOptions = new ChatOptions
+                    {
+                        ModelId = modelName,
+                        Instructions = ""
+                    }
+                });
+            var resposta = await agent.RunAsync(prompt, cancellationToken: cancellationToken);
+            return resposta.Text;
         }
 
         public async IAsyncEnumerable<string> StreamMessageAsync(
             ChatSession session, string prompt, string modelName, [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
-            var historicoDeMensagens = ConstruirHistorico(session, prompt);
-            var opcoes = new ChatOptions { ModelId = modelName,  };
+            var historicoDeMensagens = RecuperarHistorico(Guid.NewGuid());
+            var opcoes = new ChatOptions { ModelId = modelName, };
 
-            var fluxoDeResposta = _chatClient.GetStreamingResponseAsync(historicoDeMensagens, opcoes, cancellationToken);
-              
+            var fluxoDeResposta = _chatClient.GetStreamingResponseAsync(null, opcoes, cancellationToken);
+
             await foreach (var pedaco in fluxoDeResposta.WithCancellation(cancellationToken))
             {
                 if (!string.IsNullOrEmpty(pedaco.Text))
@@ -60,20 +97,36 @@ namespace ChatOllama.Api.Infrastructure.IA
                 }
             }
         }
-        private List<ChatMessage> ConstruirHistorico(ChatSession session, string prompt)
+        private async Task<List<ChatMessage>> RecuperarHistorico(Guid sessionPublicId)
         {
             var mensagens = new List<ChatMessage>();
-            if (session?.Mensagens != null)
+            var sms = await _messages.GetMessagesBySessionAsync(idchat);
+            ChatMessage msg;
+            foreach (var item in sms)
             {
-                foreach (var msg in session.Mensagens)
+                var role = item.Role == MessageRole.User ? ChatRole.User : ChatRole.Assistant;
+                msg = new ChatMessage(role, item.Content)
                 {
-                    var role = msg.Role.ToString() == "User" ? ChatRole.User : ChatRole.Assistant;
-                    mensagens.Add(new ChatMessage(role, msg.Content));
-                }
+                    MessageId = item.PublicId.ToString(),
+                };
+                mensagens.Add(msg);
             }
 
-            mensagens.Add(new ChatMessage(ChatRole.User, prompt));
             return mensagens;
+        }
+
+        private async Task AtualizarHistorico(MessageRole chatRole, string texto, Guid publicSessionId, string model)
+        {
+            var msg = new Message
+            {
+                Content = texto,
+                PublicId = Guid.CreateVersion7(),
+                CreatedAt = DateTime.UtcNow,
+                Role = chatRole,
+                ModelName = model,
+                ChatSessionId = idchat
+            };
+            await _messages.AddAsync(msg);
         }
     }
 }

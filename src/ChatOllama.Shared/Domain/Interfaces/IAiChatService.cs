@@ -7,7 +7,7 @@ public interface IAiChatService
     /// <summary>
     /// Envia um prompt e recebe a resposta completa de uma só vez
     /// </summary>
-    Task<string> SendMessageAsync(ChatSession session, string prompt, string modelName, CancellationToken cancellationToken = default);
+    Task<string> SendMessageAsync(Guid sessionPublicId, string prompt, string modelName, CancellationToken cancellationToken = default);
     /// <summary>
     /// Envia um prompt e recebe a resposta completa de uma só vez.
     /// </summary>

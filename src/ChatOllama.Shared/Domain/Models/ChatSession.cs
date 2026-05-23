@@ -5,7 +5,7 @@ namespace ChatOllama.Shared.Domain.Models
     public class ChatSession
     {
         public int Id { get; set; }
-        public Guid PublicId { get; set; }
+        public Guid PublicIdd { get; set; }
         public string Titulo { get; set; } = string.Empty;
         public int UsuarioId { get; set; }
         public ICollection<Message> Mensagens { get; set; }

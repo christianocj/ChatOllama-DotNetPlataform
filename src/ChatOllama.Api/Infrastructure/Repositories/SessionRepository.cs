@@ -23,7 +23,7 @@ namespace ChatOllama.Api.Infrastructure.Repositories
         public async Task DeleteAsync(Guid publicId)
         {
             var session = _dbContext.ChatSessions.FirstOrDefault(
-                x => x.PublicId == publicId);
+                x => x.PublicIdd == publicId);
            _dbContext.ChatSessions.Remove(session);
         }
 
@@ -38,7 +38,7 @@ namespace ChatOllama.Api.Infrastructure.Repositories
         public async Task<ChatSession?> GetByPublicIdAsync(Guid publicId)
         {
             return _dbContext.ChatSessions.FirstOrDefault(
-                x => x.PublicId == publicId);
+                x => x.PublicIdd == publicId);
         }
 
         public Task<ChatSession?> GetSessionWithMessagesAsync(Guid publicId)

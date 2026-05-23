@@ -18,7 +18,7 @@ namespace ChatOllama.Api.Infrastructure.Data
             {
                 entity.HasKey(s => s.Id);
 
-                entity.HasIndex(s => s.PublicId)
+                entity.HasIndex(s => s.PublicIdd)
                       .IsUnique();
 
                 entity.Property(s => s.Titulo)
