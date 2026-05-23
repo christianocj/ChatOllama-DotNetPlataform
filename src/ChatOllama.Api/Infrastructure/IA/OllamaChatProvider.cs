@@ -5,6 +5,7 @@ using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
 using OllamaSharp;
 using System.Runtime.CompilerServices;
+using System.Text;
 
 namespace ChatOllama.Api.Infrastructure.IA
 {
@@ -91,7 +92,6 @@ namespace ChatOllama.Api.Infrastructure.IA
             var agent = _chatClient.AsAIAgent(
                new ChatClientAgentOptions
                {
-                   //ChatHistoryProvider = new OllamaChatHistoryProvider(),
                    ChatOptions = new ChatOptions
                    {
                        ModelId = modelName,
@@ -111,15 +111,14 @@ namespace ChatOllama.Api.Infrastructure.IA
 
             var stream = agent.RunStreamingAsync(msg, memory, cancellationToken: cancellationToken);
 
-            string respostaCompleta = string.Empty;
+            var respostaCompleta = new StringBuilder();
             await foreach (var pedaco in stream)
             {
                 yield return pedaco.Text;
-                respostaCompleta += pedaco.Text;
+                respostaCompleta.Append(pedaco.Text);
             }
-            await AtualizarHistorico(MessageRole.Assistant, respostaCompleta, sessionPublicId, modelName);
+            await AtualizarHistorico(MessageRole.Assistant, respostaCompleta.ToString(), sessionPublicId, modelName);
         }
-
 
         public async IAsyncEnumerable<string> StreamMessageAsync(string prompt, string modelName, CancellationToken cancellationToken = default)
         {
@@ -136,7 +135,7 @@ namespace ChatOllama.Api.Infrastructure.IA
             var msg = new ChatMessage(ChatRole.User, prompt)
             {
                 CreatedAt = DateTime.UtcNow,
-                AuthorName = "Chris",
+                AuthorName = "ChrisTemp",
                 MessageId = Guid.CreateVersion7().ToString()
             };
             await foreach (var token in agent.RunStreamingAsync(msg, cancellationToken: cancellationToken))
