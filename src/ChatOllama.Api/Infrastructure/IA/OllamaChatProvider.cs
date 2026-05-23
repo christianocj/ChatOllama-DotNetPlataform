@@ -121,10 +121,30 @@ namespace ChatOllama.Api.Infrastructure.IA
         }
 
 
-        public IAsyncEnumerable<string> StreamMessageAsync(string prompt, string modelName, CancellationToken cancellationToken = default)
+        public async IAsyncEnumerable<string> StreamMessageAsync(string prompt, string modelName, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var agent = _chatClient.AsAIAgent(
+                new ChatClientAgentOptions
+                {
+                    ChatHistoryProvider = new OllamaChatTemporaryHistoryProvider(),
+                    ChatOptions = new ChatOptions
+                    {
+                        ModelId = modelName,
+                        Instructions = ""
+                    }
+                });
+            var msg = new ChatMessage(ChatRole.User, prompt)
+            {
+                CreatedAt = DateTime.UtcNow,
+                AuthorName = "Chris",
+                MessageId = Guid.CreateVersion7().ToString()
+            };
+            await foreach (var token in agent.RunStreamingAsync(msg, cancellationToken: cancellationToken))
+            {
+                yield return token.Text;
+            }
         }
+
         private async Task<List<ChatMessage>> RecuperarHistorico(Guid sessionPublicId)
         {
             var mensagens = new List<ChatMessage>();
