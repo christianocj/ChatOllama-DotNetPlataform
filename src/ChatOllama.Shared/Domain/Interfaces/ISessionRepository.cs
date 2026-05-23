@@ -9,10 +9,8 @@ namespace ChatOllama.Shared.Domain.Interfaces
         // Buscar o histórico todo de uma sessão
         Task<ChatSession?> GetSessionWithMessagesAsync(Guid publicId);
 
-        // Lista para a barra lateral do teu Chat
+        // Lista para a barra lateral do Chat
         Task<IEnumerable<ChatSession>> GetAllRecentAsync();
-
-        // Criar e Atualizar recebem a entidade pura
         Task AddAsync(ChatSession session);
         Task UpdateAsync(ChatSession session);
 
