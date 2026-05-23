@@ -50,9 +50,4 @@ namespace ChatOllama.Api.Infrastructure.IA
             File.WriteAllText(_filePath, json);
         }
     }
-    public sealed class State
-    {
-        [JsonPropertyName("messages")]
-        public List<ChatMessage> Messages { get; set; } = [];
-    }
 }
