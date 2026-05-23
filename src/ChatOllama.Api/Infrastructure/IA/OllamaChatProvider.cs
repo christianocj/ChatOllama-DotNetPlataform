@@ -58,9 +58,6 @@ namespace ChatOllama.Api.Infrastructure.IA
             var resposta = await agent.RunAsync(msg, memory, cancellationToken: cancellationToken);
 
             await AtualizarHistorico(MessageRole.Assistant, resposta.Text, sessionPublicId, modelName);
-
-            memory.TryGetInMemoryChatHistory(out var list);
-            Console.WriteLine(list?.Count);
             return resposta.Text;
         }
 
@@ -70,32 +67,63 @@ namespace ChatOllama.Api.Infrastructure.IA
             var agent = _chatClient.AsAIAgent(
                 new ChatClientAgentOptions
                 {
-                    ChatHistoryProvider = new OllamaChatHistoryProvider(),
+                    ChatHistoryProvider = new OllamaChatTemporaryHistoryProvider(),
                     ChatOptions = new ChatOptions
                     {
                         ModelId = modelName,
                         Instructions = ""
                     }
                 });
-            var resposta = await agent.RunAsync(prompt, cancellationToken: cancellationToken);
+            var msg = new ChatMessage(ChatRole.User, prompt)
+            {
+                CreatedAt = DateTime.UtcNow,
+                AuthorName = "Chris",
+                MessageId = Guid.CreateVersion7().ToString()
+            };
+
+            var resposta = await agent.RunAsync(msg, cancellationToken: cancellationToken);
             return resposta.Text;
         }
 
         public async IAsyncEnumerable<string> StreamMessageAsync(
-            ChatSession session, string prompt, string modelName, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+            Guid sessionPublicId, string prompt, string modelName, [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
-            var historicoDeMensagens = RecuperarHistorico(Guid.NewGuid());
-            var opcoes = new ChatOptions { ModelId = modelName, };
+            var agent = _chatClient.AsAIAgent(
+               new ChatClientAgentOptions
+               {
+                   //ChatHistoryProvider = new OllamaChatHistoryProvider(),
+                   ChatOptions = new ChatOptions
+                   {
+                       ModelId = modelName,
+                       Instructions = ""
+                   }
+               });
 
-            var fluxoDeResposta = _chatClient.GetStreamingResponseAsync(null, opcoes, cancellationToken);
+            var memory = await agent.CreateSessionAsync(cancellationToken);
+            memory.SetInMemoryChatHistory(await RecuperarHistorico(sessionPublicId));
 
-            await foreach (var pedaco in fluxoDeResposta.WithCancellation(cancellationToken))
+            var msg = new ChatMessage(ChatRole.User, prompt)
             {
-                if (!string.IsNullOrEmpty(pedaco.Text))
-                {
-                    yield return pedaco.Text;
-                }
+                CreatedAt = DateTime.UtcNow,
+                MessageId = Guid.CreateVersion7().ToString()
+            };
+            await AtualizarHistorico(MessageRole.User, prompt, sessionPublicId, modelName);
+
+            var stream = agent.RunStreamingAsync(msg, memory, cancellationToken: cancellationToken);
+
+            string respostaCompleta = string.Empty;
+            await foreach (var pedaco in stream)
+            {
+                yield return pedaco.Text;
+                respostaCompleta += pedaco.Text;
             }
+            await AtualizarHistorico(MessageRole.Assistant, respostaCompleta, sessionPublicId, modelName);
+        }
+
+
+        public IAsyncEnumerable<string> StreamMessageAsync(string prompt, string modelName, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
         }
         private async Task<List<ChatMessage>> RecuperarHistorico(Guid sessionPublicId)
         {
