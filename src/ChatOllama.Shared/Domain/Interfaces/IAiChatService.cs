@@ -1,6 +1,4 @@
-﻿using ChatOllama.Shared.Domain.Models;
-
-namespace ChatOllama.Shared.Domain.Interfaces;
+﻿namespace ChatOllama.Shared.Domain.Interfaces;
 
 public interface IAiChatService
 {
@@ -9,14 +7,20 @@ public interface IAiChatService
     /// </summary>
     Task<string> SendMessageAsync(Guid sessionPublicId, string prompt, string modelName, CancellationToken cancellationToken = default);
     /// <summary>
-    /// Envia um prompt e recebe a resposta completa de uma só vez.
+    /// Envia um prompt e recebe a resposta completa de uma só vez. 
+    /// Sem o parametro Guid sessionPublicId para conversas temporárias
     /// </summary>
     Task<string> SendMessageAsync(string prompt, string modelName, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Envia um prompt e recebe a resposta token por token
+    /// Envia um prompt e recebe a resposta Token por token. 
     /// </summary>
-    IAsyncEnumerable<string> StreamMessageAsync(ChatSession session, string prompt, string modelName, CancellationToken cancellationToken = default);
+    IAsyncEnumerable<string> StreamMessageAsync(Guid sessionPublicId, string prompt, string modelName, CancellationToken cancellationToken = default);
+    /// <summary>
+    /// Envia um prompt e recebe a resposta token por token.
+    /// Sem o parametro Guid sessionPublicId para conversas temporárias
+    /// </summary>
+    IAsyncEnumerable<string> StreamMessageAsync(string prompt, string modelName, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Lista os modelos disponíveis instalados no servidor do Ollama (ex: llama3, phi3).
