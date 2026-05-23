@@ -43,9 +43,6 @@ builder.Services.AddScoped<ISessionRepository, SessionRepository>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-// Configure the HTTP request pipeline.
-// Configure the HTTP request pipeline.
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -53,11 +50,16 @@ if (app.Environment.IsDevelopment())
 
 app.MapGet("/chat", async ([FromServices] IAiChatService aiChat, string prompt) =>
 {
-    
     string text = await aiChat.SendMessageAsync(Guid.NewGuid(), prompt, "gpt-oss:20b-cloud");
-    //string text1 = await aiChat.SendMessageAsync(null, "Qual o meu nome?", "gpt-oss:20b-cloud");
     Console.WriteLine(text);
-    return Results.Text(text, "application/json", System.Text.Encoding.UTF8);
+    return Results.Text(text, contentEncoding: System.Text.Encoding.UTF8);
+});
+
+app.MapGet("/chat-temporary", async ([FromServices] IAiChatService aiChat, string prompt) =>
+{
+    string text = await aiChat.SendMessageAsync(prompt, "llama3.1");
+    Console.WriteLine(text);
+    return Results.Text(text, contentEncoding: System.Text.Encoding.UTF8);
 });
 
 app.UseHttpsRedirection();
