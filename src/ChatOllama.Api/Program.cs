@@ -4,6 +4,11 @@ using ChatOllama.Shared.Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.AI;
 using OllamaSharp;
+using Scalar.AspNetCore;
+
+string local_model = "llama3.1:latest";
+string cloud_model = "gpt-oss:20b-cloud";
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +16,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddEfCore();
+builder.Services.AddOpenApi();
 
 // 1. Configura o HttpClient específico para o Ollama com o Timeout de 3 minutos
 builder.Services.AddHttpClient("OllamaClient", client =>
@@ -27,7 +33,7 @@ builder.Services.AddScoped(sp =>
 
     return new OllamaApiClient(httpClient)
     {
-        SelectedModel = "llama3.1:latest" // Modelo padrão inicial
+        SelectedModel = local_model // Modelo padrão inicial
     };
 });
 
@@ -46,20 +52,37 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    // Adiciona a interface do Scalar
+    app.MapScalarApiReference(options =>
+    {
+        options.WithTitle("ChatOllama API");
+        options.DarkMode = true;
+        options.WithTheme(ScalarTheme.BluePlanet); 
+    });
 }
 
 app.MapGet("/chat", async ([FromServices] IAiChatService aiChat, string prompt) =>
 {
-    string text = await aiChat.SendMessageAsync(Guid.NewGuid(), prompt, "gpt-oss:20b-cloud");
+    string text = await aiChat.SendMessageAsync(Guid.NewGuid(), prompt, cloud_model);
     Console.WriteLine(text);
     return Results.Text(text, contentEncoding: System.Text.Encoding.UTF8);
 });
 
 app.MapGet("/chat-temporary", async ([FromServices] IAiChatService aiChat, string prompt) =>
 {
-    string text = await aiChat.SendMessageAsync(prompt, "llama3.1");
+    string text = await aiChat.SendMessageAsync(prompt, cloud_model);
     Console.WriteLine(text);
     return Results.Text(text, contentEncoding: System.Text.Encoding.UTF8);
+});
+app.MapGet("/chat-stream", async ([FromServices] IAiChatService aiChat, string prompt) =>
+{
+    string txt = string.Empty;
+    await foreach (var item in aiChat.StreamMessageAsync(Guid.NewGuid(), prompt, cloud_model))
+    {
+        txt += item;
+        Console.Write(item);
+    }
+    return Results.Text(txt, contentEncoding: System.Text.Encoding.UTF8);
 });
 
 app.UseHttpsRedirection();
