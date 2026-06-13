@@ -107,8 +107,6 @@ namespace ChatOllama.Api.Infrastructure.IA
                 CreatedAt = DateTime.UtcNow,
                 MessageId = Guid.CreateVersion7().ToString()
             };
-            await AtualizarHistorico(MessageRole.User, prompt, sessionPublicId, modelName);
-
             var stream = agent.RunStreamingAsync(msg, memory, cancellationToken: cancellationToken);
 
             var respostaCompleta = new StringBuilder();
@@ -117,6 +115,7 @@ namespace ChatOllama.Api.Infrastructure.IA
                 yield return pedaco.Text;
                 respostaCompleta.Append(pedaco.Text);
             }
+            await AtualizarHistorico(MessageRole.User, prompt, sessionPublicId, modelName);
             await AtualizarHistorico(MessageRole.Assistant, respostaCompleta.ToString(), sessionPublicId, modelName);
         }
 
