@@ -1,0 +1,69 @@
+﻿@namespace ChatOllama.Web.Components.Pages.Chat
+@using ChatOllama.Web.Models
+@using ChatOllama.Web.Services
+@using Microsoft.AspNetCore.Components
+@rendermode InteractiveServer
+
+@page "/"
+<PageTitle>Chat Assistant</PageTitle>
+
+<div class="chat-container">
+    <div class="chat-sidebar">
+        <div class="sidebar-header">
+            <button class="btn-new-chat" @onclick="CreateNewChat">
+                Nova Conversa
+            </button>
+        </div>
+
+        <div class="conversations-list">
+            @foreach (var chat in Chats)
+            {
+                <div class="conversation-item @(currentChatId == chat.Id ? "active" : "")"
+                     @onclick="() => LoadChat(chat.Id)">
+                    <div class="conversation-info">
+                        <div class="conversation-title">@chat.Title</div>
+                        <div class="conversation-date">@chat.LastMessageDate.ToString("dd/MM/yyyy")</div>
+                    </div>
+                    @if (chat.Id != currentChatId)
+                    {
+                        <button class="btn-delete-chat" @onclick:stopPropagation="true" @onclick="() => DeleteChat(chat.Id)">
+                            ✕
+                        </button>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="chat-main">
+        @if (currentChatId == null)
+        {
+            <div class="welcome-screen">
+                <div class="welcome-content">
+                    <h1>Chat Assistant</h1>
+                    <p>Como posso ajudar você hoje?</p>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="messages-container" @ref="messagesContainer">
+                @foreach (var msg in Messages)
+                {
+                    <ChatMessage Message="msg" />
+                }
+
+                @if (isLoading)
+                {
+                    <div class="loading-indicator">
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                    </div>
+                }
+            </div>
+
+            <PromptBox OnSend="SendMessage" IsLoading="isLoading" />
+        }
+    </div>
+</div>
