@@ -368,3 +368,4 @@ src/ChatOllama.Api/banco.db
 src/ChatOllama.Api/temporarychat.json
 *.db
 src/ChatOllama.Api/banco.db
+src/ChatOllama.Api/banco.db
