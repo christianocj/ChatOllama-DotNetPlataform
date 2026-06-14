@@ -38,8 +38,15 @@ namespace ChatOllama.Api.Infrastructure.IA
             if (!File.Exists(_filePath))
                 return new State();
 
-            var json = File.ReadAllText(_filePath);
-            return JsonSerializer.Deserialize<State>(json) ?? new State();
+            try
+            {
+                var json = File.ReadAllText(_filePath);
+                return JsonSerializer.Deserialize<State>(json) ?? new State();
+            }
+            catch (JsonException)
+            {
+                return new State();
+            }
         }
 
         private void SaveToFile(State state)

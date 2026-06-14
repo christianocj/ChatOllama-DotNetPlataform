@@ -7,8 +7,8 @@ using OllamaSharp;
 using Scalar.AspNetCore;
 
 string local_model = "llama3.1:latest";
-string cloud_model = "gpt-oss:20b-cloud";
-
+string cloud_model = "gemma4:31b-cloud";
+//string cloud_model = "gpt-oss:20b-cloud";
 
 var builder = WebApplication.CreateBuilder(args);
 

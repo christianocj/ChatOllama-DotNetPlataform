@@ -2,7 +2,6 @@
 using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace ChatOllama.Api.Infrastructure.IA
 {
@@ -40,8 +39,15 @@ namespace ChatOllama.Api.Infrastructure.IA
             if (!File.Exists(_filePath))
                 return new State();
 
-            var json = File.ReadAllText(_filePath);
-            return JsonSerializer.Deserialize<State>(json) ?? new State();
+            try
+            {
+                var json = File.ReadAllText(_filePath);
+                return JsonSerializer.Deserialize<State>(json) ?? new State();
+            }
+            catch (JsonException ex) when (ex.Message.Contains("no JSON tokens"))
+            {
+                return new State();
+            }
         }
 
         private void SaveToFile(State state)
