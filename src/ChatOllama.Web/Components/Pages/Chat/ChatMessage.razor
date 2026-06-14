@@ -1,0 +1,34 @@
+﻿@using ChatOllama.Web.Models
+
+<div class="message-wrapper @(Message.Role == "user" ? "user-message" : "assistant-message")">
+    <div class="message-avatar">
+        @if (Message.Role == "user")
+        {
+            <span>U</span>
+        }
+        else
+        {
+            <span>A</span>
+        }
+    </div>
+
+    <div class="message-content">
+        <div class="message-header">
+            <span class="message-role">@(Message.Role == "user" ? "Você" : "Assistant")</span>
+        </div>
+        <div class="message-text">
+            @FormatMessage(Message.Content)
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public ChatMessageModel Message { get; set; } = default!;
+
+    private MarkupString FormatMessage(string content)
+    {
+        content = content.Replace("\n", "<br />");
+        return new MarkupString(content);
+    }
+}

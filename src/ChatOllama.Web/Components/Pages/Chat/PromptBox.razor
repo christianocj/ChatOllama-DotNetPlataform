@@ -1,0 +1,48 @@
+@namespace ChatOllama.Web.Components.Pages.Chat
+@rendermode InteractiveServer
+
+<div class="prompt-container">
+    <div class="input-wrapper">
+        <textarea class="prompt-input"
+                  placeholder="Digite sua mensagem... (Enter para enviar, Shift+Enter para nova linha)"
+                  @bind="Prompt"
+                  @bind:event="oninput"
+                  @onkeydown="HandleKeyDown"
+                  rows="1">
+        </textarea>
+
+        <button class="send-button"
+                @onclick="Send"
+                disabled="@(string.IsNullOrWhiteSpace(Prompt) || IsLoading)">
+            Enviar
+        </button>
+    </div>
+</div>
+
+@code {
+    private string Prompt = string.Empty;
+
+    [Parameter]
+    public EventCallback<string> OnSend { get; set; }
+
+    [Parameter]
+    public bool IsLoading { get; set; }
+
+    private async Task Send()
+    {
+        if (string.IsNullOrWhiteSpace(Prompt) || IsLoading)
+            return;
+
+        await OnSend.InvokeAsync(Prompt);
+        Prompt = string.Empty;
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !e.ShiftKey)
+        {
+            // e.PreventDefault();
+            await Send();
+        }
+    }
+}
