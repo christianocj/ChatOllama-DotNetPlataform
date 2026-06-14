@@ -1,6 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <ItemGroup>
+    <Content Remove="Components\Pages\Weather.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\Chat.js" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\ChatOllama.Shared\ChatOllama.Shared.csproj" />
   </ItemGroup>
 

@@ -1,7 +1,15 @@
 using ChatOllama.Web.Components;
+using ChatOllama.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddScoped<ChatApiClient>();
+
+builder.Services.AddHttpClient<ChatApiClient>(client =>
+{
+    client.Timeout = TimeSpan.FromMinutes(3);
+    client.BaseAddress = new Uri("https://localhost:7258/");
+});
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
