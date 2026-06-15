@@ -33,8 +33,9 @@
         if (string.IsNullOrWhiteSpace(Prompt) || IsLoading)
             return;
 
-        await OnSend.InvokeAsync(Prompt);
+        var currentPrompt = Prompt;
         Prompt = string.Empty;
+        await OnSend.InvokeAsync(currentPrompt);
     }
 
     private async Task HandleKeyDown(KeyboardEventArgs e)
