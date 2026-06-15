@@ -1,14 +1,12 @@
 ﻿@namespace ChatOllama.Web.Components.Pages.Chat
-@using ChatOllama.Web.Models
-@using ChatOllama.Web.Services
 @using Microsoft.AspNetCore.Components
 @rendermode InteractiveServer
 
 @page "/"
 <PageTitle>Chat Assistant</PageTitle>
 
-<div class="chat-container">
-    <div class="chat-sidebar">
+<div class="page-layout">
+    <div class="sidebar">
         <div class="sidebar-header">
             <button class="btn-new-chat" @onclick="CreateNewChat">
                 Nova Conversa
@@ -35,7 +33,7 @@
         </div>
     </div>
 
-    <div class="chat-main">
+    <div class="main-content">
         @if (currentChatId == null)
         {
             <div class="welcome-screen">
