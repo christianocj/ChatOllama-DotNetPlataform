@@ -68,11 +68,27 @@ app.MapGet("/chat", async ([FromServices] IAiChatService aiChat, string prompt) 
     return Results.Text(text, contentEncoding: System.Text.Encoding.UTF8);
 });
 
-app.MapGet("/chat-temporary", async ([FromServices] IAiChatService aiChat, string prompt) =>
+app.MapPost("/chat-temporary", async ([FromServices] IAiChatService aiChat, [FromBody] ChatRequest request) =>
 {
-    string text = await aiChat.SendMessageAsync(prompt, cloud_model);
-    Console.WriteLine(text);
-    return Results.Text(text, contentEncoding: System.Text.Encoding.UTF8);
+    try
+    {
+        if (request == null || string.IsNullOrWhiteSpace(request.Prompt))
+        {
+            return Results.BadRequest(new { error = "O prompt não pode estar vazio" });
+        }
+
+        string text = await aiChat.SendMessageAsync(request.Prompt, cloud_model);
+        Console.WriteLine(text);
+
+        // Retorna a resposta no formato esperado pelo cliente
+        var response = new ChatOllama.Api.Models.ChatResponse { Response = text };
+        return Results.Json(response);
+    }
+    catch (Exception ex)
+    {
+        Console.Error.WriteLine($"Erro no endpoint chat-temporary: {ex.Message}");
+        return Results.Problem("Ocorreu um erro interno no servidor", statusCode: 500);
+    }
 });
 app.MapGet("/chat-stream", async ([FromServices] IAiChatService aiChat, string prompt) =>
 {
