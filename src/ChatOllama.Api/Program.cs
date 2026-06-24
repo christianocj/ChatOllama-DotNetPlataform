@@ -1,5 +1,6 @@
 using ChatOllama.Api.Infrastructure.IA;
 using ChatOllama.Api.Infrastructure.Repositories;
+using ChatOllama.Api.Models;
 using ChatOllama.Shared.Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.AI;
