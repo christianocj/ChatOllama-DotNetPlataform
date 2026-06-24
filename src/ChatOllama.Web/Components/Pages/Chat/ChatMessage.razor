@@ -1,4 +1,8 @@
 ﻿@using ChatOllama.Web.Models
+<<<<<<< Updated upstream
+=======
+@using Microsoft.JSInterop
+>>>>>>> Stashed changes
 
 <div class="message-wrapper @(Message.Role == "user" ? "user-message" : "assistant-message")">
     <div class="message-avatar">
@@ -15,6 +19,18 @@
     <div class="message-content">
         <div class="message-header">
             <span class="message-role">@(Message.Role == "user" ? "Você" : "Assistant")</span>
+<<<<<<< Updated upstream
+=======
+            @if (Message.Role == "assistant")
+            {
+                <button class="btn-copy-message"
+                        @onclick="CopyToClipboard"
+                        title="Copiar mensagem"
+                        aria-label="Copiar mensagem para a área de transferência">
+                    📋
+                </button>
+            }
+>>>>>>> Stashed changes
         </div>
         <div class="message-text">
             @FormatMessage(Message.Content)
@@ -26,9 +42,34 @@
     [Parameter]
     public ChatMessageModel Message { get; set; } = default!;
 
+<<<<<<< Updated upstream
+=======
+    [Inject]
+    private IJSRuntime JS { get; set; } = default!;
+
+>>>>>>> Stashed changes
     private MarkupString FormatMessage(string content)
     {
         content = content.Replace("\n", "<br />");
         return new MarkupString(content);
     }
+<<<<<<< Updated upstream
+=======
+
+    private async Task CopyToClipboard()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("navigator.clipboard.writeText", Message.Content);
+            // Opção: mostrar feedback visual de cópia bem-sucedida
+            // Por enquanto, só vamos fazer o log no console
+            await JS.InvokeVoidAsync("console.log", "Mensagem copiada para a área de transferência");
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("console.error", $"Erro ao copiar para a área de transferência: {ex.Message}");
+            // Em uma implementação mais robusta, poderíamos mostrar uma notificação ao usuário
+        }
+    }
+>>>>>>> Stashed changes
 }

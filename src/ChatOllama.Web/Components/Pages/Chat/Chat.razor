@@ -8,7 +8,14 @@
 <div class="page-layout">
     <div class="sidebar">
         <div class="sidebar-header">
+<<<<<<< Updated upstream
             <button class="btn-new-chat" @onclick="CreateNewChat">
+=======
+            <button class="btn-new-chat"
+                    @onclick="CreateNewChat"
+                    aria-label="Iniciar nova conversa"
+                    title="Nova conversa (Ctrl+N)">
+>>>>>>> Stashed changes
                 Nova Conversa
             </button>
         </div>
@@ -17,14 +24,29 @@
             @foreach (var chat in Chats)
             {
                 <div class="conversation-item @(currentChatId == chat.Id ? "active" : "")"
+<<<<<<< Updated upstream
                      @onclick="() => LoadChat(chat.Id)">
+=======
+                     @onclick="() => LoadChat(chat.Id)"
+                     role="button"
+                     tabindex="0"
+                     aria-selected="@(currentChatId == chat.Id)"
+                     aria-label="@($"Conversa: {chat.Title}, {chat.LastMessageDate:dd/MM/yyyy}")">
+>>>>>>> Stashed changes
                     <div class="conversation-info">
                         <div class="conversation-title">@chat.Title</div>
                         <div class="conversation-date">@chat.LastMessageDate.ToString("dd/MM/yyyy")</div>
                     </div>
                     @if (chat.Id != currentChatId)
                     {
+<<<<<<< Updated upstream
                         <button class="btn-delete-chat" @onclick:stopPropagation="true" @onclick="() => DeleteChat(chat.Id)">
+=======
+                        <button class="btn-delete-chat"
+                                @onclick:stopPropagation="true"
+                                @onclick="() => DeleteChat(chat.Id)"
+                                aria-label="Excluir conversa">
+>>>>>>> Stashed changes
                             ✕
                         </button>
                     }
@@ -36,7 +58,11 @@
     <div class="main-content">
         @if (currentChatId == null)
         {
+<<<<<<< Updated upstream
             <div class="welcome-screen">
+=======
+            <div class="welcome-screen" role="region" aria-label="Tela de boas-vindas">
+>>>>>>> Stashed changes
                 <div class="welcome-content">
                     <h1>Chat Assistant</h1>
                     <p>Como posso ajudar você hoje?</p>
@@ -45,7 +71,14 @@
         }
         else
         {
+<<<<<<< Updated upstream
             <div class="messages-container" @ref="messagesContainer">
+=======
+            <div class="messages-container"
+                 @ref="messagesContainer"
+                 aria-live="polite"
+                 aria-atomic="true">
+>>>>>>> Stashed changes
                 @foreach (var msg in Messages)
                 {
                     <ChatMessage Message="msg" />
@@ -53,10 +86,18 @@
 
                 @if (isLoading)
                 {
+<<<<<<< Updated upstream
                     <div class="loading-indicator">
                         <div class="dot"></div>
                         <div class="dot"></div>
                         <div class="dot"></div>
+=======
+                    <div class="loading-indicator" aria-label="Carregando resposta..." role="status">
+                        <div class="dot" aria-hidden="true"></div>
+                        <div class="dot" aria-hidden="true"></div>
+                        <div class="dot" aria-hidden="true"></div>
+                        <span class="sr-only">Aguardando resposta...</span>
+>>>>>>> Stashed changes
                     </div>
                 }
             </div>

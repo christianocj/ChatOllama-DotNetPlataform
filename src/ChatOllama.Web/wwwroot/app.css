@@ -57,6 +57,11 @@ h1:focus {
 
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
+<<<<<<< Updated upstream
+=======
+<<<<<<< Updated upstream
+=======
+>>>>>>> Stashed changes
 }
 
 // CSS CUSTOMIZADO PARA TODO FRONTEND
@@ -414,4 +419,44 @@ h1:focus {
     .main-content {
         margin-left: 240px;
     }
+<<<<<<< Updated upstream
+=======
+}
+
+/* Acessibilidade - elementos visíveis apenas para leitores de tela */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+/* Botão de copiar mensagem */
+.btn-copy-message {
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: all 0.2s;
+    margin-left: 8px;
+    opacity: 0.7;
+}
+
+.btn-copy-message:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: #333;
+    opacity: 1;
+}
+
+.btn-copy-message:active {
+    background: rgba(0, 0, 0, 0.1);
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 }
