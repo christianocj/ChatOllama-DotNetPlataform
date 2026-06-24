@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ChatOllama.Shared\ChatOllama.Shared.csproj" />
+    <ProjectReference Include="..\ChatOllama.Api\ChatOllama.Api.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

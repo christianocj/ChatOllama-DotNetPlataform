@@ -111,12 +111,24 @@ namespace ChatOllama.Web.Components.Pages.Chat
 
         private async Task SendMessage(string prompt)
         {
+<<<<<<< Updated upstream
             Messages.Add(new()
             {
                 Role = "user",
                 Content = prompt
             });
 
+=======
+            // Adiciona a mensagem do usuário ao chat
+            var userMessage = new ChatMessageModel
+            {
+                Role = "user",
+                Content = prompt
+            };
+            Messages.Add(userMessage);
+
+            // Atualiza o chat atual se existir
+>>>>>>> Stashed changes
             var currentChat = Chats.FirstOrDefault(c => c.Id == currentChatId);
             if (currentChat != null)
             {
@@ -131,6 +143,7 @@ namespace ChatOllama.Web.Components.Pages.Chat
 
             StateHasChanged();
 
+<<<<<<< Updated upstream
             isLoading = true;
             StateHasChanged();
 
@@ -151,6 +164,97 @@ namespace ChatOllama.Web.Components.Pages.Chat
             }
 
             StateHasChanged();
+=======
+            // Mostra indicador de carregamento
+            isLoading = true;
+            StateHasChanged();
+
+            try
+            {
+                // Envia a mensagem para a API e aguarda a resposta
+                string response = await Api.SendAsync(prompt);
+
+                // Adiciona a resposta do assistente ao chat
+                var assistantMessage = new ChatMessageModel
+                {
+                    Role = "assistant",
+                    Content = response
+                };
+                Messages.Add(assistantMessage);
+
+                // Atualiza o chat atual se existir
+                if (currentChat != null)
+                {
+                    currentChat.Messages = Messages;
+                    SaveChats();
+                }
+            }
+            catch (HttpRequestException httpEx)
+            {
+                // Trata erros de HTTP (conexão, timeout, etc.)
+                var errorMessage = $"Erro de conexão: Não foi possível conectar-se ao serviço de chat. Verifique se o servidor está em execução.";
+
+                Messages.Add(new ChatMessageModel
+                {
+                    Role = "assistant",
+                    Content = errorMessage
+                });
+
+                if (currentChat != null)
+                {
+                    currentChat.Messages = Messages;
+                    SaveChats();
+                }
+
+                // Log para diagnóstico (em produção, usar um logger adequado)
+                Console.Error.WriteLine($"HTTP Error in SendMessage: {httpEx.Message}");
+            }
+            catch (InvalidOperationException invalidOpEx)
+            {
+                // Trata erros de operação inválida (resposta mal formatada, etc.)
+                var errorMessage = $"Erro no processamento: {invalidOpEx.Message}";
+
+                Messages.Add(new ChatMessageModel
+                {
+                    Role = "assistant",
+                    Content = errorMessage
+                });
+
+                if (currentChat != null)
+                {
+                    currentChat.Messages = Messages;
+                    SaveChats();
+                }
+
+                Console.Error.WriteLine($"Invalid Operation Error in SendMessage: {invalidOpEx.Message}");
+            }
+            catch (Exception ex)
+            {
+                // Trata qualquer outro erro inesperado
+                var errorMessage = "Desculpe, ocorreu um erro inesperado. Por favor, tente novamente mais tarde.";
+
+                Messages.Add(new ChatMessageModel
+                {
+                    Role = "assistant",
+                    Content = errorMessage
+                });
+
+                if (currentChat != null)
+                {
+                    currentChat.Messages = Messages;
+                    SaveChats();
+                }
+
+                // Log para diagnóstico
+                Console.Error.WriteLine($"Unexpected Error in SendMessage: {ex.Message}");
+            }
+            finally
+            {
+                // Sempre esconde o indicador de carregamento
+                isLoading = false;
+                StateHasChanged();
+            }
+>>>>>>> Stashed changes
         }
     }
 }
